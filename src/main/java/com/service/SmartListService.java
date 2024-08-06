@@ -2,7 +2,6 @@ package com.service;
 
 import com.config.CustomMap;
 import com.dto.*;
-import com.exception.ConstraintViolationException;
 import com.model.*;
 import com.repository.*;
 import com.type.ConfigType;
@@ -13,7 +12,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Service
