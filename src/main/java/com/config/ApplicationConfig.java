@@ -48,4 +48,9 @@ public class ApplicationConfig {
                 )
         );
     }
+
+    @Bean
+    public CustomMap customMap() {
+        return new CustomMap();
+    }
 }

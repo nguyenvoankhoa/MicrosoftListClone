@@ -29,4 +29,9 @@ public class ColumnConfig {
         this.configType = configType;
         this.column = column;
     }
+
+    public ColumnConfig(String configValue, ConfigType configType) {
+        this.configValue = configValue;
+        this.configType = configType;
+    }
 }

@@ -29,17 +29,20 @@ public class SmartListService implements ISmartListService {
     private ColumnRepository columnRepository;
     private CellRepository cellRepository;
     private CustomMap customMap;
-    @Autowired
     private Cloudinary cloudinary;
 
-    public SmartListService(ModelMapper modelMapper, SmartListRepository smartListRepository, ITemplateService templateService, RowRepository rowRepository, ColumnRepository columnRepository, CellRepository cellRepository) {
+    public SmartListService(ModelMapper modelMapper, SmartListRepository smartListRepository,
+                            ITemplateService templateService, RowRepository rowRepository,
+                            ColumnRepository columnRepository, CellRepository cellRepository,
+                            CustomMap customMap, Cloudinary cloudinary) {
         this.modelMapper = modelMapper;
         this.smartListRepository = smartListRepository;
         this.templateService = templateService;
         this.rowRepository = rowRepository;
         this.columnRepository = columnRepository;
         this.cellRepository = cellRepository;
-        this.customMap = new CustomMap();
+        this.customMap = customMap;
+        this.cloudinary = cloudinary;
     }
 
     public SmartListDTO createList(String name) {
