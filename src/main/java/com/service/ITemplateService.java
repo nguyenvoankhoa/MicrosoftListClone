@@ -13,6 +13,5 @@ public interface ITemplateService {
 
     TemplateDTO saveListToTemplate(ListToTemplateDTO request);
 
-
     List<TemplateDTO> getAllTemplates();
 }

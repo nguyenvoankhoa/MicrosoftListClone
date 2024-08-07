@@ -10,10 +10,11 @@ import com.model.Row;
 import com.model.SmartList;
 import com.type.ConfigType;
 
-import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 public class Common {
@@ -101,5 +102,9 @@ public class Common {
         }
     }
 
-
+    public static String encodeImageToBase64(String filePath) throws IOException {
+        File file = new File(filePath);
+        byte[] fileContent = Files.readAllBytes(file.toPath());
+        return Base64.getEncoder().encodeToString(fileContent);
+    }
 }

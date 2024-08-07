@@ -18,7 +18,7 @@ public interface ISmartListService {
 
     SmartListDTO getSortedAndPagedSmartList(String listId, String sortBy, String order, int pageNum, int pageSize);
 
-    SmartListDTO addRowData(RowDataDTO request);
+    List<CellDTO> addRowData(RowDataDTO request);
 
     RowDTO getRowById(String rowId);
 

@@ -74,12 +74,13 @@ public class SmartListService implements ISmartListService {
 
 
     @Override
-    public SmartListDTO addRowData(RowDataDTO request) {
+    public List<CellDTO> addRowData(RowDataDTO request) {
         List<CreateCellDTO> cells = request.getRow();
+        List<CellDTO> dto = new ArrayList<>();
         for (CreateCellDTO c : cells) {
-            createCell(c);
+            dto.add(modelMapper.map(createCell(c), CellDTO.class));
         }
-        return null;
+        return dto;
     }
 
     @Override

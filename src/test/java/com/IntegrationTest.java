@@ -1,46 +1,48 @@
 package com;
 
-import com.controller.SmartListController;
 import com.dto.*;
+import com.dto.datatype.Choice;
+import com.dto.datatype.Image;
+import com.dto.datatype.MultipleChoice;
 import com.dto.datatype.Text;
 import com.service.ISmartListService;
 import com.type.ColumnType;
 import com.type.ConfigType;
+import com.util.Common;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-class SmartListControllerTest {
-
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class IntegrationTest {
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @Autowired
     private MockMvc mockMvc;
     private String listId;
-    @Mock
+    private String rowId;
+    private String colId;
+    @Autowired
     private ISmartListService smartListService;
-    @InjectMocks
-    private SmartListController smartListController;
+
 
     @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(smartListController).build();
-        listId = "1b481aa1-929c-451f-8a97-808ff8aeccc0";
+    public void setup() {
+        listId = "c4c91d94-8530-4b48-9880-c03eeeae1909";
+        colId = "993f45a1-3368-47eb-a004-db856cc27a38";
+        rowId = "79fca832-ab4c-4513-bc27-90c185368df2";
     }
 
     @Test
@@ -60,8 +62,6 @@ class SmartListControllerTest {
         responseDTO.setConfigs(List.of(config));
         responseDTO.setVisible(true);
         responseDTO.setAllowDefault(true);
-
-        when(smartListService.createColumn(anyString(), any(CreateColumnDTO.class))).thenReturn(responseDTO);
 
         String jsonContent = "{\"name\": \"Text Column\", \"columnType\": \"TEXT\", \"allowDefault\": true, \"configs\": [{\"configType\": \"MAX_CHARACTER\", \"configValue\": \"30\"}]}";
 
@@ -92,8 +92,6 @@ class SmartListControllerTest {
         responseDTO.setConfigs(List.of(config));
         responseDTO.setVisible(true);
         responseDTO.setAllowDefault(true);
-
-        when(smartListService.createColumn(anyString(), any(CreateColumnDTO.class))).thenReturn(responseDTO);
 
         String jsonContent = "{\"name\": \"Choice Column\", \"columnType\": \"CHOICE\"," +
                 " \"allowDefault\": true, \"configs\": [{\"configType\": \"DEFAULT_VALUE\", \"configValue\": \"Choice 1\"}]}";
@@ -130,7 +128,6 @@ class SmartListControllerTest {
         responseDTO.setVisible(true);
         responseDTO.setAllowDefault(true);
 
-        when(smartListService.createColumn(anyString(), any(CreateColumnDTO.class))).thenReturn(responseDTO);
 
         String jsonContent = "{\"name\": \"Multiple choice Column\", \"columnType\": \"MULTIPLE_CHOICE\", " +
                 "\"allowDefault\": true, \"configs\": [{\"configType\": \"DEFAULT_VALUE\", \"configValue\": \"Choice 1\"}," +
@@ -169,8 +166,6 @@ class SmartListControllerTest {
         responseDTO.setVisible(true);
         responseDTO.setAllowDefault(true);
 
-        when(smartListService.createColumn(anyString(), any(CreateColumnDTO.class))).thenReturn(responseDTO);
-
         String jsonContent = "{\"name\": \"Number Column\", \"columnType\": \"NUMBER\", " +
                 "\"allowDefault\": true, \"configs\": [{\"configType\": \"MIN_VALUE\", \"configValue\": \"1\"}," +
                 " {\"configType\": \"MIN_VALUE\", \"configValue\": \"300\"}]}";
@@ -202,8 +197,6 @@ class SmartListControllerTest {
         responseDTO.setVisible(true);
         responseDTO.setAllowDefault(true);
 
-        when(smartListService.createColumn(anyString(), any(CreateColumnDTO.class))).thenReturn(responseDTO);
-
         String jsonContent = "{\"name\": \"Image Column\", \"columnType\": \"IMAGE\", " +
                 "\"allowDefault\": true, \"configs\": []}";
 
@@ -233,8 +226,6 @@ class SmartListControllerTest {
         responseDTO.setVisible(true);
         responseDTO.setAllowDefault(true);
 
-        when(smartListService.createColumn(anyString(), any(CreateColumnDTO.class))).thenReturn(responseDTO);
-
         String jsonContent = "{\"name\": \"Hyperlink Column\", \"columnType\": \"HYPERLINK\", \"allowDefault\": true, \"configs\": []}";
 
         mockMvc.perform(MockMvcRequestBuilders.post("/smart-lists/{id}/columns", listId)
@@ -248,58 +239,117 @@ class SmartListControllerTest {
     }
 
 
-
     @Test
     void testAddCellData() throws Exception {
         CreateCellDTO requestDTO = new CreateCellDTO();
-        requestDTO.setColId("col1");
-        requestDTO.setRowId("row1");
+        requestDTO.setColId(colId);
+        requestDTO.setRowId(rowId);
         requestDTO.setData("Sample Data");
 
         CellDTO responseDTO = new CellDTO();
-        responseDTO.setColId("col1");
-        responseDTO.setRowId("row1");
-        responseDTO.setData("Sample Data");
-
-        when(smartListService.addCellData(any(CreateCellDTO.class))).thenReturn(responseDTO);
+        responseDTO.setColId(colId);
+        responseDTO.setRowId(rowId);
+        Text text = new Text("Sample Data");
+        responseDTO.setData(text);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/smart-lists/data")
-                        .content("{\"colId\": \"col1\", \"rowId\": \"row1\", \"data\": \"Sample Data\"}")
+                        .content("{\"colId\": \"" + colId + "\", " +
+                                "\"rowId\": \"" + rowId + "\", " +
+                                "\"data\": \"Sample Data\"}")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.colId").value(responseDTO.getColId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.rowId").value(responseDTO.getRowId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.data").value(responseDTO.getData()));
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.str").value(((Text) responseDTO.getData()).getStr()));
     }
 
     @Test
     void testAddRowData() throws Exception {
         CreateCellDTO cell1 = new CreateCellDTO();
-        cell1.setColId("col1");
-        cell1.setRowId("row1");
-        cell1.setData("Data1");
+        cell1.setColId(colId);
+        cell1.setRowId(rowId);
+        cell1.setData("Sample Data");
 
         CreateCellDTO cell2 = new CreateCellDTO();
-        cell2.setColId("col2");
-        cell2.setRowId("row1");
-        cell2.setData("Data2");
+        cell2.setColId(colId);
+        cell2.setRowId(rowId);
+        cell2.setData("Choice 1,green");
+
+        CreateCellDTO cell3 = new CreateCellDTO();
+        cell2.setColId(colId);
+        cell2.setRowId(rowId);
+        cell2.setData("Choice 1,black#Choice 2,red");
+
+        CreateCellDTO cell4 = new CreateCellDTO();
+        cell2.setColId(colId);
+        cell2.setRowId(rowId);
+        String encode = Common.encodeImageToBase64("src/test/java/com/test-image.jpg");
+        cell2.setData(encode);
 
         RowDataDTO requestDTO = new RowDataDTO();
-        requestDTO.setRow(List.of(cell1, cell2));
+        requestDTO.setRow(List.of(cell1, cell2, cell3, cell4));
+
 
         CellDTO cell11 = new CellDTO();
-        cell11.setColId("col1");
-        cell11.setRowId("row1");
+        cell11.setColId(colId);
+        cell11.setRowId(rowId);
         Text text = new Text("Sample Data");
         cell11.setData(text);
 
-        when(smartListService.addRowData(any(RowDataDTO.class))).thenReturn(List.of(cell11));
+        CellDTO cell12 = new CellDTO();
+        cell12.setColId(colId);
+        cell12.setRowId(rowId);
+        Choice choice = new Choice("Choice 1", "green");
+        cell12.setData(choice);
+
+
+        CellDTO cell13 = new CellDTO();
+        cell13.setColId(colId);
+        cell13.setRowId(rowId);
+        Choice c1 = new Choice("Choice 1", "black");
+        Choice c2 = new Choice("Choice 2", "red");
+        MultipleChoice mulChoice = new MultipleChoice(List.of(c1, c2));
+        cell13.setData(mulChoice);
+
+
+        CellDTO cell14 = new CellDTO();
+        cell14.setColId(colId);
+        cell14.setRowId(rowId);
+        Image image = new Image("");
+        cell14.setData(image);
+
 
         mockMvc.perform(MockMvcRequestBuilders.post("/smart-lists/rows")
-                        .content("{\"row\":[{\"colId\":\"col1\",\"rowId\":\"row1\",\"data\":\"Data1\"},{\"colId\":\"col2\",\"rowId\":\"row1\",\"data\":\"Data2\"}]}")
+                        .content("{\"row\":[{\"colId\":\"" + colId + "\"," +
+                                "\"rowId\":\"" + rowId + "\"," +
+                                "\"data\":{\"str\":\"Sample Data\"}}," +
+                                "{\"colId\":\"" + colId + "\"," +
+                                "\"rowId\":\"" + rowId + "\"," +
+                                "\"data\":{\"name\":\"Choice 1\",\"color\":\"green\"}}," +
+                                "{\"colId\":\"" + colId + "\"," +
+                                "\"rowId\":\"" + rowId + "\"," +
+                                "\"data\":{\"choiceList\":[{\"name\":\"Choice 1\",\"color\":\"black\"}," +
+                                "{\"name\":\"Choice 2\",\"color\":\"red\"}]}}," +
+                                "{\"colId\":\"" + colId + "\"," +
+                                "\"rowId\":\"" + rowId + "\"," +
+                                "\"data\":{\"url\":\"https://res.cloudinary.com/dsdwh3bxe/image/upload/v1722999075/esvalav6lqbkskz7lwp4.jpg\"}}]}")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].colId").value(colId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].rowId").value(rowId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].data.str").value("Sample Data"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].colId").value(colId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].rowId").value(rowId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].data.name").value("Choice 1"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1].data.color").value("green"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[2].colId").value(colId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[2].rowId").value(rowId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[2].data.choiceList[0].name").value("Choice 1"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[2].data.choiceList[0].color").value("black"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[2].data.choiceList[1].name").value("Choice 2"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[2].data.choiceList[1].color").value("red"))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[3].colId").value(colId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[3].rowId").value(rowId))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[3].data.url").value("https://res.cloudinary.com/dsdwh3bxe/image/upload/v1722999075/esvalav6lqbkskz7lwp4.jpg"));
     }
-
-
 }

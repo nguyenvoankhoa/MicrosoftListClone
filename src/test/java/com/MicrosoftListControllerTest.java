@@ -1,41 +1,39 @@
 package com;
 
 import com.controller.MicrosoftListController;
-import com.dto.ListToTemplateDTO;
-import com.dto.SmartListDTO;
-import com.dto.TemplateDTO;
-import com.dto.TemplateToListDTO;
+import com.dto.*;
+import com.dto.datatype.Text;
 import com.service.ISmartListService;
 import com.service.ITemplateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
 class MicrosoftListControllerTest {
-
     private MockMvc mockMvc;
-
     @Mock
     private ISmartListService smartListService;
-
     @Mock
     private ITemplateService templateService;
     @InjectMocks
@@ -69,7 +67,7 @@ class MicrosoftListControllerTest {
     @Test
     void testCreateListFromTemplate() throws Exception {
         TemplateToListDTO requestDTO = new TemplateToListDTO();
-        requestDTO.setTemplateId("");
+        requestDTO.setTemplateId("1");
         requestDTO.setListName("List from template");
 
 
@@ -82,10 +80,10 @@ class MicrosoftListControllerTest {
 
 
         when(smartListService.createListFromTemplate(any(TemplateToListDTO.class))).thenReturn(responseDTO);
-
+        String requestJson = "{\"templateId\": \"1\", \"listName\": \"List from template\"}";
 
         mockMvc.perform(MockMvcRequestBuilders.post("/microsoft-lists/lists/from-template")
-                        .content("{\"someField\": \"someValue\"}")
+                        .content(requestJson)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(responseDTO.getId()))
@@ -105,11 +103,40 @@ class MicrosoftListControllerTest {
 
         when(templateService.saveListToTemplate(any(ListToTemplateDTO.class))).thenReturn(responseDTO);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/microsoft-lists/lists/from-template")
+        mockMvc.perform(MockMvcRequestBuilders.post("/microsoft-lists/lists/save-template")
                         .content("{\"templateName\": \"Template from list\", \"listId\": \"c4c91d94-8530-4b48-9880-c03eeeae1909\"}")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.templateName").value(responseDTO.getTemplateName()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.columns").isArray());
+    }
+
+    @Test
+    void testAddRowData() throws Exception {
+        CreateCellDTO cell1 = new CreateCellDTO();
+        cell1.setColId("col1");
+        cell1.setRowId("row1");
+        cell1.setData("Data1");
+
+        CreateCellDTO cell2 = new CreateCellDTO();
+        cell2.setColId("col2");
+        cell2.setRowId("row1");
+        cell2.setData("Data2");
+
+        RowDataDTO requestDTO = new RowDataDTO();
+        requestDTO.setRow(List.of(cell1, cell2));
+
+        CellDTO cell11 = new CellDTO();
+        cell11.setColId("col1");
+        cell11.setRowId("row1");
+        Text text = new Text("Sample Data");
+        cell11.setData(text);
+
+        when(smartListService.addRowData(any(RowDataDTO.class))).thenReturn(List.of(cell11));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/smart-lists/rows")
+                        .content("{\"row\":[{\"colId\":\"col1\",\"rowId\":\"row1\",\"data\":\"Data1\"},{\"colId\":\"col2\",\"rowId\":\"row1\",\"data\":\"Data2\"}]}")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
     }
 }

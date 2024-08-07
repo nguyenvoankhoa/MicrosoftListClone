@@ -43,8 +43,8 @@ public class SmartListController {
     }
 
     @PostMapping("rows")
-    public ResponseEntity<SmartListDTO> addRowData(@RequestBody RowDataDTO request) {
-        SmartListDTO dto = smartListService.addRowData(request);
+    public ResponseEntity<List<CellDTO>> addRowData(@RequestBody RowDataDTO request) {
+        List<CellDTO> dto = smartListService.addRowData(request);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
