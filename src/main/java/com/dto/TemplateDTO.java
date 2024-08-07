@@ -6,6 +6,7 @@ import lombok.Data;
 import java.util.List;
 @Data
 public class TemplateDTO {
+    String id;
     String templateName;
-    List<Column> columns;
+    List<ColumnDTO> columns;
 }

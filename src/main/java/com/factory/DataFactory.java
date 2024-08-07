@@ -38,11 +38,11 @@ public class DataFactory {
 
     public Person convertPerson(String data) {
         String[] arr = data.split(",");
-        return new Person(arr[0], arr[1].getBytes());
+        return new Person(arr[0], arr[1]);
     }
 
     public Image convertImage(String data) {
-        return new Image(data.getBytes());
+        return new Image(data);
     }
 
     public HyperLink convertHyperLink(String data) {
@@ -54,10 +54,11 @@ public class DataFactory {
         return new com.dto.datatype.Number(Double.parseDouble(data));
     }
 
-    public Date convertDate(String data) {
+    public DateTime convertDate(String data) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
-            return formatter.parse(data);
+            Date date = formatter.parse(data);
+            return new DateTime(date);
         } catch (ParseException e) {
             LOGGER.log(Level.SEVERE, "Invalid date format: {}", data);
             return null;

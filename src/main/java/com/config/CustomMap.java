@@ -19,6 +19,14 @@ public class CustomMap {
         return dto;
     }
 
+    public TemplateDTO mapTemplate(Template t) {
+        TemplateDTO dto = new TemplateDTO();
+        dto.setId(t.getId());
+        dto.setTemplateName(t.getName());
+        dto.setColumns(mapColumnDTO(t.getSmartList().getColumns()));
+        return dto;
+    }
+
     public CellDTO mapCell(Cell cell) {
         DataFactory df = new DataFactory();
         CellDTO dto = new CellDTO();

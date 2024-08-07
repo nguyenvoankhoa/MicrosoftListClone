@@ -2,6 +2,7 @@ package com.service;
 
 import com.dto.*;
 import com.model.SmartList;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ public interface ISmartListService {
 
     void deleteRow(String rowId, String listId);
 
-    CreateCellDTO addCellData(CreateCellDTO request);
+    CellDTO addCellData(CreateCellDTO request);
 
     ColumnDTO getColumnById(String listId, String colId);
 
@@ -42,4 +43,5 @@ public interface ISmartListService {
     List<RowDTO> getAllRows(String id);
 
     void createRow(String id);
+
 }

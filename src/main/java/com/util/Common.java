@@ -20,6 +20,29 @@ public class Common {
     private Common() {
     }
 
+    public static void validateConfig(ColumnConfig config, String data) {
+        ConfigType configType = config.getConfigType();
+        String configValue = config.getConfigValue();
+        switch (configType) {
+            case MAX_CHARACTER:
+                validateMaxCharacter(data, configValue);
+                break;
+            case REQUIRE:
+                validateRequirement(data);
+                break;
+            case MIN_VALUE:
+                validateMinValue(data, configValue);
+                break;
+            case MAX_VALUE:
+                validateMaxValue(data, configValue);
+                break;
+            case DEFAULT_VALUE:
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown ConfigType: " + configType);
+        }
+    }
+
     public static void validateMaxCharacter(String data, String configValue) {
         int maxLength = parseInt(configValue);
         if (data.length() > maxLength) {
@@ -49,7 +72,7 @@ public class Common {
         }
     }
 
-    public static  int parseInt(String value) {
+    public static int parseInt(String value) {
         try {
             return Integer.parseInt(value);
         } catch (NumberFormatException e) {

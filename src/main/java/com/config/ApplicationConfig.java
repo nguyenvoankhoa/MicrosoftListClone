@@ -1,5 +1,7 @@
 package com.config;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.dto.*;
 import com.model.*;
 import org.modelmapper.ModelMapper;
@@ -28,6 +30,22 @@ public class ApplicationConfig {
 
         modelMapper.createTypeMap(View.class, ViewDTO.class)
                 .setConverter(context -> customMap.mapView(context.getSource()));
+
+        modelMapper.createTypeMap(Template.class, TemplateDTO.class)
+                .setConverter(context -> customMap.mapTemplate(context.getSource()));
         return modelMapper;
+    }
+
+
+    @Bean
+    public Cloudinary cloudinary() {
+        return new Cloudinary(
+                ObjectUtils.asMap(
+                        "cloud_name", "dsdwh3bxe",
+                        "api_key", "118986666866357",
+                        "api_secret", "ALqS681v3w3OAgq9JwAaPZAyXwg",
+                        "secure", true
+                )
+        );
     }
 }

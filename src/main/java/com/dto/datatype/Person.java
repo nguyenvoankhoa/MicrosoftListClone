@@ -7,5 +7,5 @@ import lombok.Data;
 @AllArgsConstructor
 public class Person {
     String name;
-    byte[] avatar;
+    String avatar;
 }

@@ -1,16 +1,22 @@
 package com.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.config.CustomMap;
 import com.dto.*;
+import com.exception.ConstraintViolationException;
 import com.model.*;
 import com.repository.*;
+import com.type.ColumnType;
 import com.type.ConfigType;
 import com.util.Common;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -23,6 +29,8 @@ public class SmartListService implements ISmartListService {
     private ColumnRepository columnRepository;
     private CellRepository cellRepository;
     private CustomMap customMap;
+    @Autowired
+    private Cloudinary cloudinary;
 
     public SmartListService(ModelMapper modelMapper, SmartListRepository smartListRepository, ITemplateService templateService, RowRepository rowRepository, ColumnRepository columnRepository, CellRepository cellRepository) {
         this.modelMapper = modelMapper;
@@ -88,20 +96,20 @@ public class SmartListService implements ISmartListService {
         smartListRepository.save(sl);
     }
 
-    @Override
-    public CreateCellDTO addCellData(CreateCellDTO request) {
-        return modelMapper.map(createCell(request), CreateCellDTO.class);
+    public CellDTO addCellData(CreateCellDTO request) {
+        return modelMapper.map(createCell(request), CellDTO.class);
     }
 
-    public Cell createCell(CreateCellDTO request) {
-        Column column = getColumn(request.getColId());
-        Row row = getRow(request.getRowId());
-        checkCellConstraint(column.getConfigs(), request.getData());
-        Cell c = cellRepository.findCellByRowAndColumn(row.getId(), column.getId());
-        c.setData(request.getData());
-        return cellRepository.save(c);
+    public String handleUploadImage(String data) {
+        try {
+            byte[] imageBytes = Base64.getDecoder().decode(data);
+            Map r = cloudinary.uploader().upload(imageBytes,
+                    ObjectUtils.asMap("resource_type", "auto"));
+            return (String) r.get("secure_url");
+        } catch (IOException e) {
+            throw new ConstraintViolationException();
+        }
     }
-
 
     public Row getRow(String rowId) {
         Row row = rowRepository.findById(rowId).orElse(null);
@@ -215,30 +223,22 @@ public class SmartListService implements ISmartListService {
         return lists.stream().map(l -> modelMapper.map(l, SmartListDTO.class)).toList();
     }
 
-    public void checkCellConstraint(List<ColumnConfig> configs, String data) {
-        for (ColumnConfig config : configs) {
-            ConfigType configType = config.getConfigType();
-            String configValue = config.getConfigValue();
-            switch (configType) {
-                case MAX_CHARACTER:
-                    Common.validateMaxCharacter(data, configValue);
-                    break;
-                case REQUIRE:
-                    Common.validateRequirement(data);
-                    break;
-                case MIN_VALUE:
-                    Common.validateMinValue(data, configValue);
-                    break;
-                case MAX_VALUE:
-                    Common.validateMaxValue(data, configValue);
-                    break;
-                case DEFAULT_VALUE:
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown ConfigType: " + configType);
-            }
-        }
+    public Cell createCell(CreateCellDTO request) {
+        Column column = getColumn(request.getColId());
+        Row row = getRow(request.getRowId());
+        checkCellConstraint(column.getConfigs(), request.getData());
+        Cell c = cellRepository.findCellByRowAndColumn(row.getId(), column.getId());
+        String data = column.getType().equals(ColumnType.IMAGE)
+                ? handleUploadImage(request.getData())
+                : request.getData();
+        c.setData(data);
+        return cellRepository.save(c);
     }
 
+    public void checkCellConstraint(List<ColumnConfig> configs, String data) {
+        for (ColumnConfig config : configs) {
+            Common.validateConfig(config, data);
+        }
+    }
 
 }

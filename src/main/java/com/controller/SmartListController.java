@@ -26,6 +26,12 @@ public class SmartListController {
         this.viewService = viewService;
     }
 
+    @PostMapping("data")
+    public ResponseEntity<CellDTO> addCellData(@RequestBody CreateCellDTO request) {
+        CellDTO dto = smartListService.addCellData(request);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
     @GetMapping("{id}")
     public ResponseEntity<SmartListDTO> getSmartList(@RequestParam(name = "sortBy", required = false) String sortBy,
                                                      @RequestParam(name = "order", required = false) String order,
@@ -55,11 +61,7 @@ public class SmartListController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("data")
-    public ResponseEntity<CreateCellDTO> addCellData(@RequestBody CreateCellDTO request) {
-        CreateCellDTO dto = smartListService.addCellData(request);
-        return new ResponseEntity<>(dto, HttpStatus.OK);
-    }
+
 
     @GetMapping("column-types")
     public ResponseEntity<ColumnType[]> getColumnTypes() {
